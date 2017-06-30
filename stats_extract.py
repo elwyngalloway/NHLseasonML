@@ -95,7 +95,11 @@ def create_annual_tables(start_season):
         "s_power_play": "http://www.nhl.com/stats/rest/grouped/skaters/basic/season/powerplay?cayenneExp=seasonId=" + hockey_season + "%20and%20gameTypeId=2",
         "s_faceoffs": "http://www.nhl.com/stats/rest/grouped/skaters/basic/season/faceoffs?cayenneExp=seasonId=" + hockey_season + "%20and%20gameTypeId=2",
         "s_points_by_strength": "http://www.nhl.com/stats/rest/grouped/skaters/basic/season/points?cayenneExp=seasonId=" + hockey_season + "%20and%20gameTypeId=2",
-        "s_goals_by_strength": "http://www.nhl.com/stats/rest/grouped/skaters/basic/season/goals?cayenneExp=seasonId=" + hockey_season + "%20and%20gameTypeId=2"
+        "s_goals_by_strength": "http://www.nhl.com/stats/rest/grouped/skaters/basic/season/goals?cayenneExp=seasonId=" + hockey_season + "%20and%20gameTypeId=2",
+        "g_goalie_summary": "http://www.nhl.com/stats/rest/grouped/goalies/goalie_basic/season/goaliesummary?cayenneExp=seasonId=" + hockey_season + "%20and%20gameTypeId=2",
+        "g_saves_by_strength": "http://www.nhl.com/stats/rest/grouped/goalies/goalie_basic/season/goaliebystrength?cayenneExp=seasonId=" + hockey_season + "%20and%20gameTypeId=2",
+        "g_goalie_shootout": "http://www.nhl.com/stats/rest/grouped/goalies/goalie_shootout/season/goalieshootout?cayenneExp=seasonId=" + hockey_season + "%20and%20gameTypeId=2",
+        "g_bio_info": "http://www.nhl.com/stats/rest/grouped/goalies/goalie_basic/season/goaliebios?cayenneExp=seasonId=" + hockey_season + "%20and%20gameTypeId=2"
     }
 
     return tables
@@ -107,7 +111,6 @@ for x in range(2009, 2016):
     scrape_data(db_name, create_annual_tables(x))
 
 # export the data to csv files
-
 
 
 print("Now I'm done")
