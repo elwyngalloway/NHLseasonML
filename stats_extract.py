@@ -5,11 +5,11 @@ import datetime
 import time
 
 # some variable names
-db_name = "NHLseasonML.db"
+db_name = "NHLseasonML_seasonstats.db"
 
 # seasons lookup. format for date range is YYYY-MM-DD,YYYY-MM-DD
 seasons_dict = {
-    "20162017": "2015-10-12,2016-04-09",
+    "20162017": "2016-10-12,2017-04-09",
     "20152016": "2015-10-07,2016-04-10",
     "20142015": "2014-10-08,2015-04-11",
     "20132014": "2013-10-01,2014-04-13",
@@ -17,14 +17,14 @@ seasons_dict = {
     "20112012": "2011-10-06,2012-04-07",
     "20102011": "2010-10-07,2011-04-10",
     "20092010": "2009-10-01,2010-04-11",
-    "20082009": "2008-10-04,2010-04-12",
+    "20082009": "2008-10-04,2009-04-12",
     "20072008": "2007-09-29,2008-04-06",
     "20062007": "2006-10-04,2007-04-08",
     "20052006": "2005-10-05,2006-04-18"
 }
 
 test_seasons_dict = {
-    "20152016": "2015-11-25,2015-11-26"
+    "20172018": "2017-10-04,2017-11-07"
 }
 
 
@@ -63,11 +63,12 @@ def scrape_data(database_name, table_list, table_type):
             else:
                 create_table = "CREATE table IF NOT EXISTS " + table_key + " (" + column_list + "unique(gameId, playerId));"
 
+            print("Processing " + table_key)
+
             # create our table if it doesn't exist
             cur.execute(create_table)
             conn.commit()
 
-            # print("Processing " + table_key)
 
             # use a list to store each row that will be written
             biglist = []
@@ -163,6 +164,36 @@ def create_annual_tables(hockey_season):
     return tables
 
 
+def create_annual_tables_nhldotcom2018(hockey_season):
+    # dictionary of data. Consists of a table name, and the corresponding JSON URL
+    # skater franchise totals is not useful at all so its being left out
+    tables = {
+        "s_skater_summary": "http://www.nhl.com/stats/rest/skaters?&reportType=basic&reportName=skatersummary&cayenneExp=gameTypeId=2%20and%20seasonId=" + hockey_season,
+        "s_skater_points": "http://www.nhl.com/stats/rest/skaters?&reportType=basic&reportName=skaterpoints&cayenneExp=gameTypeId=2%20and%20seasonId=" + hockey_season,
+        "s_skater_goals": "http://www.nhl.com/stats/rest/skaters?&reportType=basic&reportName=skatergoals&cayenneExp=gameTypeId=2%20and%20seasonId=" + hockey_season,
+        "s_faceoffs": "http://www.nhl.com/stats/rest/skaters?&reportType=basic&reportName=faceoffs&cayenneExp=gameTypeId=2%20and%20seasonId=" + hockey_season,
+        "s_power_play": "http://www.nhl.com/stats/rest/skaters?&reportType=basic&reportName=skaterpowerplay&cayenneExp=gameTypeId=2%20and%20seasonId=" + hockey_season,
+        "s_penalty_kill": "http://www.nhl.com/stats/rest/skaters?&reportType=basic&reportName=skaterpenaltykill&cayenneExp=gameTypeId=2%20and%20seasonId=" + hockey_season,
+        "s_realtime_events": "http://www.nhl.com/stats/rest/skaters?&reportType=basic&reportName=realtime&cayenneExp=gameTypeId=2%20and%20seasonId=" + hockey_season,
+        "s_penalties": "http://www.nhl.com/stats/rest/skaters?&reportType=basic&reportName=penalties&cayenneExp=gameTypeId=2%20and%20seasonId=" + hockey_season,
+        "s_time_on_ice": "http://www.nhl.com/stats/rest/skaters?&reportType=basic&reportName=timeonice&cayenneExp=gameTypeId=2%20and%20seasonId=" + hockey_season,
+        "s_shootout": "http://www.nhl.com/stats/rest/skaters?reportType=shootout&reportName=skatershootout&cayenneExp=gameTypeId=2%20and%20seasonId=" + hockey_season,
+        "s_plusminus": "http://www.nhl.com/stats/rest/skaters?&reportType=basic&reportName=plusminus&cayenneExp=gameTypeId=2%20and%20seasonId=" + hockey_season,
+        "s_bio_info": "http://www.nhl.com/stats/rest/skaters?&reportType=basic&reportName=bios&cayenneExp=gameTypeId=2%20and%20seasonId=" + hockey_season,
+        "s_sat_5_on_5": "http://www.nhl.com/stats/rest/skaters?&reportType=basic&reportName=skatersummaryshooting&cayenneExp=gameTypeId=2%20and%20seasonId=" + hockey_season,
+        "s_sat_pct_5_on_5": "http://www.nhl.com/stats/rest/skaters?&reportType=basic&reportName=skaterpercentages&cayenneExp=gameTypeId=2%20and%20seasonId=" + hockey_season,
+        "s_points_penalties_per_60": "http://www.nhl.com/stats/rest/skaters?&reportType=basic&reportName=skaterscoring&cayenneExp=gameTypeId=2%20and%20seasonId=" + hockey_season,
+        "s_faceoffs_by_zone": "http://www.nhl.com/stats/rest/skaters?&reportType=basic&reportName=faceoffsbyzone&cayenneExp=gameTypeId=2%20and%20seasonId=" + hockey_season,
+        "s_shots_by_type": "http://www.nhl.com/stats/rest/skaters?&reportType=basic&reportName=shottype&cayenneExp=gameTypeId=2%20and%20seasonId=" + hockey_season,
+        "g_goalie_summary": "http://www.nhl.com/stats/rest/goalies?reportType=goalie_basic&reportName=goaliesummary&cayenneExp=gameTypeId=2%20and%20seasonId=" + hockey_season,
+        "g_saves_by_strength": "http://www.nhl.com/stats/rest/goalies?reportType=goalie_basic&reportName=goaliebystrength&cayenneExp=gameTypeId=2%20and%20seasonId=" + hockey_season,
+        "g_goalie_shootout": "http://www.nhl.com/stats/rest/goalies?reportType=goalie_shootout&reportName=goalieshootout&cayenneExp=gameTypeId=2%20and%20seasonId=" + hockey_season,
+        "g_bio_info": "http://www.nhl.com/stats/rest/goalies?reportType=goalie_basic&reportName=goaliebios&cayenneExp=gameTypeId=2%20and%20seasonId=" + hockey_season
+    }
+
+    return tables
+
+
 def create_daily_tables(day):
     this_day_start = day.strftime("%Y-%m-%d")
     this_day_end = (day + datetime.timedelta(days=1)).strftime("%Y-%m-%d")
@@ -197,7 +228,7 @@ def scrape_by_season(season_info):
     for this_season in season_info:
         print("Scraping data from " + this_season)
         #scrape the data here, this also builds the appropriate tables for the queries
-        scrape_data(db_name, create_annual_tables(this_season), "season")
+        scrape_data(db_name, create_annual_tables_nhldotcom2018(this_season), "season")
     return
 
 
@@ -223,7 +254,7 @@ print(str(start) + " Start")
 scrape_by_season(seasons_dict)
 
 # run this function to get daily stats tables created/updated
-scrape_by_game(seasons_dict)
+#scrape_by_game(seasons_dict)
 
 print(str(start) + " Start")
 print(str(datetime.datetime.now()) + " Finish")
