@@ -32,12 +32,17 @@ test_seasons_dict = {
 def scrape_data(database_name, table_list, table_type):
     # loop through the list, pulling the data into our DB
     for table_key in table_list:
-
-        # make the web request to pull the json data
+        # make the web request to pull the json data. Bare minimum error checking
         req = urllib.request.Request(table_list[table_key])
-        # now pretty it up
-        #data = json.loads(urllib.request.urlopen(req).read()) # works on windows, but not MacOS or RaspPi
-        data = json.loads(urllib.request.urlopen(req).read().decode('utf-8'))
+        try:
+            res = urllib.request.urlopen(req).read()
+        except Exception as e:
+            print("Error requesting: " + table_list[table_key])
+            print(e)
+            continue
+
+        # now pretty it up.
+        data = json.loads(res.decode('utf-8'))
 
         # make sure we have actual results, otherwise skip this table for this time period
         if data['total'] >= 1:
@@ -224,6 +229,34 @@ def create_daily_tables(day):
     }
     return tables
 
+def create_daily_tables_nhldotcom2018(day):
+    this_day_start = day.strftime("%Y-%m-%d")
+    this_day_end = (day + datetime.timedelta(days=1)).strftime("%Y-%m-%d")
+    # same as annual tables. JSON URL, and the key corresponds to the SQL table name that will be created/updated
+    cayenne = "&cayenneExp=gameDate%3E=%22" + this_day_start + "%22%20and%20gameDate%3C=%22" + this_day_end + "%22%20and%20gameTypeId=2"
+    tables = {
+        "s_daily_skater_summary":"http://www.nhl.com/stats/rest/skaters?reportType=basic&isGame=true&reportName=skatersummary" + cayenne,
+        "s_daily_skater_goals": "http://www.nhl.com/stats/rest/skaters?reportType=basic&isGame=true&reportName=skatergoals" + cayenne,
+        "s_daily_skater_points": "http://www.nhl.com/stats/rest/skaters?reportType=basic&isGame=true&reportName=skaterpoints" + cayenne,
+        "s_daily_skater_faceoffs": "http://www.nhl.com/stats/rest/skaters?reportType=basic&isGame=true&reportName=faceoffs" + cayenne,
+        "s_daily_skater_powerplay": "http://www.nhl.com/stats/rest/skaters?reportType=basic&isGame=true&reportName=skaterpowerplay" + cayenne,
+        "s_daily_skater_penaltykill": "http://www.nhl.com/stats/rest/skaters?reportType=basic&isGame=true&reportName=skaterpenaltykill" + cayenne,
+        "s_daily_skater_realtime": "http://www.nhl.com/stats/rest/skaters?reportType=basic&isGame=true&reportName=realtime" + cayenne,
+        "s_daily_skater_penalties": "http://www.nhl.com/stats/rest/skaters?reportType=basic&isGame=true&reportName=penalties" + cayenne,
+        "s_daily_skater_timeonice": "http://www.nhl.com/stats/rest/skaters?reportType=basic&isGame=true&reportName=timeonice" + cayenne,
+        "s_daily_skater_shootout": "http://www.nhl.com/stats/rest/skaters?reportType=shootout&isGame=true&reportName=skatershootout" + cayenne,
+        "s_daily_skater_SATpctg": "http://www.nhl.com/stats/rest/skaters?reportType=shooting&isGame=true&reportName=skaterpercentages" + cayenne,
+        "s_daily_skater_SAT5v5": "http://www.nhl.com/stats/rest/skaters?reportType=shooting&isGame=true&reportName=skatersummaryshooting" + cayenne,
+        "s_daily_skater_points_penalties_per60": "http://www.nhl.com/stats/rest/skaters?reportType=core&isGame=true&reportName=skaterscoring" + cayenne,
+        "s_daily_skater_faceoffs_by_zone": "http://www.nhl.com/stats/rest/skaters?reportType=core&isGame=true&reportName=faceoffsbyzone" + cayenne,
+        "s_daily_skater_shots_by_type": "http://www.nhl.com/stats/rest/skaters?reportType=core&isGame=true&reportName=shottype" + cayenne,
+        "g_daily_goalie_summary": "http://www.nhl.com/stats/rest/goalies?reportType=goalie_basic&isGame=true&reportName=goaliesummary" + cayenne,
+        "g_daily_goalie_by_strength": "http://www.nhl.com/stats/rest/goalies?reportType=goalie_basic&isGame=true&reportName=goaliebystrength" + cayenne,
+        "g_daily_goalie_shootout": "http://www.nhl.com/stats/rest/goalies?reportType=goalie_shootout&isGame=true&reportName=goalieshootout" + cayenne,
+        "g_daily_goalie_daysrest": "http://www.nhl.com/stats/rest/goalies?reportType=goalie_basic&isGame=true&reportName=goaliedaysrest" + cayenne,
+        "g_daily_goalie_penaltyshots": "http://www.nhl.com/stats/rest/goalies?reportType=goalie_basic&isGame=true&reportName=goaliepenaltyshots" + cayenne
+    }
+    return tables
 
 def scrape_by_season(season_info):
     #loop through all seasons in the dict
@@ -244,7 +277,7 @@ def scrape_by_game(season_info):
         while today <= last_day:
             print("Scraping data for games on " + today.strftime("%Y-%m-%d"))
             # scrape the data here, this also builds the appropriate tables for the queries
-            scrape_data(db_name, create_daily_tables(today), "daily")
+            scrape_data(db_name, create_daily_tables_nhldotcom2018(today), "daily")
             today += delta
     return
 
@@ -253,10 +286,10 @@ start = datetime.datetime.now()
 print(str(start) + " Start")
 
 # run this function to get seasonal stats tables created/updated
-scrape_by_season(seasons_dict)
+#scrape_by_season(test_seasons_dict)
 
 # run this function to get daily stats tables created/updated
-#scrape_by_game(seasons_dict)
+scrape_by_game(test_seasons_dict)
 
 print(str(start) + " Start")
 print(str(datetime.datetime.now()) + " Finish")
