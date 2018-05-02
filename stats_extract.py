@@ -9,6 +9,7 @@ db_name = "NHLseasonML_seasonstats.db"
 
 # seasons lookup. format for date range is YYYY-MM-DD,YYYY-MM-DD
 seasons_dict = {
+    "20172018": "2017-10-04,2018-04-08",
     "20162017": "2016-10-12,2017-04-09",
     "20152016": "2015-10-07,2016-04-10",
     "20142015": "2014-10-08,2015-04-11",
@@ -35,7 +36,8 @@ def scrape_data(database_name, table_list, table_type):
         # make the web request to pull the json data
         req = urllib.request.Request(table_list[table_key])
         # now pretty it up
-        data = json.loads(urllib.request.urlopen(req).read())
+        #data = json.loads(urllib.request.urlopen(req).read()) # works on windows, but not MacOS or RaspPi
+        data = json.loads(urllib.request.urlopen(req).read().decode('utf-8'))
 
         # make sure we have actual results, otherwise skip this table for this time period
         if data['total'] >= 1:
